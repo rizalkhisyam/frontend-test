@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import ReactRouter from './router'
+import { useSetRecoilState } from 'recoil'
+import { authenticatedUser } from './store'
+import axios from 'axios'
 
-function App() {
+export default function App() {
+  // const auth = useRecoilValue(authenticatedUser);
+  const [mounted, setMounted] = useState(true);
+  const setAuth = useSetRecoilState(authenticatedUser);
+  
+  useEffect(() => {
+    const getUser = async () => {
+      setMounted(false);
+      try {
+        let { data } = await axios.get('/api/me')
+        setAuth({
+          user: data.data,
+          check: true,
+        })
+        setMounted(true);
+      } catch (error) {
+        setMounted(true);
+        console.log('Your are not log in');
+      }
+    }
+
+    getUser();
+  }, [setAuth])
+
+  if (!mounted) {
+    return <div className="d-flex justify-content-center align-items-center min-vh-100">Loading ... </div>
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <ReactRouter/>
     </div>
-  );
+  )
 }
-
-export default App;
